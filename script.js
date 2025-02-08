@@ -1,98 +1,60 @@
-document.getElementById('csvFileInput').addEventListener('change', function(event) {
-    const file = event.target.files[0];
-
-    if (file) {
-        const reader = new FileReader();
-        reader.readAsText(file);
-        reader.onload = function(e) {
-            const csvData = e.target.result;
-            processCSV(csvData);
-        };
+const cityData = [
+    { city: "Tokyo", latitude: 35.676860, longitude: 139.763895, state: "東京都", country: "Japan", temperature: 4.14, seaLevel: 40, date: "2025-02-08", time: "23:00:00" },
+    { city: "New York", latitude: 40.712728, longitude: -74.006015, state: "New York", country: "United States", temperature: 0.58, seaLevel: 10, date: "2025-02-08", time: "23:00:01" },
+    { city: "Paris", latitude: 48.853495, longitude: 2.348391, state: "France métropolitaine", country: "France", temperature: 7.45, seaLevel: 35, date: "2025-02-08", time: "23:00:02" },
+    { city: "Berlin", latitude: 52.510885, longitude: 13.398937, state: "Pankow", country: "Germany", temperature: 3.21, seaLevel: 34, date: "2025-02-08", time: "23:00:03" },
+    { city: "Sydney", latitude: -33.869844, longitude: 151.208285, state: "New South Wales", country: "Australia", temperature: 21.17, seaLevel: 58, date: "2025-02-08", time: "23:00:04" }
+];
+function searchCity() {
+    const inputCity = document.getElementById("cityInput").value.trim().toLowerCase();
+    const result = cityData.find(entry => entry.city.toLowerCase() === inputCity);
+    if (result) {
+        displayData(result);
+    } else {
+        alert("City not found in dataset");
     }
-});
-
-// Function to process CSV data
-function processCSV(csvText) {
-    const rows = csvText.split("\n").map(row => row.split(","));
-    const headers = rows.shift(); // Extract headers
-    const tableBody = document.querySelector("#data-table tbody");
-
-    const labels = [], temperature = [], co2 = [], seaLevel = [], latitudes = [], longitudes = [];
-
-    // Loop through CSV rows
-    rows.forEach(row => {
-        if (row.length < 6) return; // Ignore incomplete rows
-
-        const [date, temp, carbon, sea, lat, lon] = row;
-        
-        // Append data to the table
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${date}</td><td>${temp}</td><td>${carbon}</td><td>${sea}</td><td>${lat}</td><td>${lon}</td>`;
-        tableBody.appendChild(tr);
-        
-        // Add data for the chart and map
-        labels.push(date);
-        temperature.push(parseFloat(temp));
-        co2.push(parseFloat(carbon));
-        seaLevel.push(parseFloat(sea));
-        latitudes.push(parseFloat(lat));
-        longitudes.push(parseFloat(lon));
-    });
-
-    createBarChart(labels, temperature, co2);
-    createPieChart(labels, co2);
-    createLineChart(labels, seaLevel);
-    plotMap(latitudes, longitudes, temperature);
 }
-
-// Function to create a Bar Chart
-function createBarChart(labels, temperature, co2) {
+function displayData(data) {
+    document.getElementById("cityName").textContent = data.city;
+    document.getElementById("temperature").textContent = `${data.temperature} °C`;
+    document.getElementById("seaLevel").textContent = `${data.seaLevel} meters`;
+    document.getElementById("location").textContent = `${data.state}, ${data.country}`;
+    createBarChart(data);
+    createLineChart(data);
+    updateMap(data);
+}
+function createBarChart(data) {
     const ctx = document.getElementById('barChart').getContext('2d');
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: labels,
-            datasets: [
-                { label: 'Temperature (°C)', data: temperature, backgroundColor: 'red' },
-                { label: 'CO2 (ppm)', data: co2, backgroundColor: 'blue' }
-            ]
-        },
-        options: { responsive: true }
-    });
-}
-
-// Function to create a Pie Chart (CO2 Levels)
-function createPieChart(labels, co2) {
-    const ctx = document.getElementById('pieChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: labels,
-            datasets: [{ label: 'CO2 Levels (ppm)', data: co2, backgroundColor: ['red', 'blue', 'green', 'orange'] }]
+            labels: ["Temperature", "Sea Level"],
+            datasets: [{
+                label: data.city,
+                data: [data.temperature, data.seaLevel],
+                backgroundColor: ['red', 'blue']
+            }]
         }
     });
 }
-
-// Function to create a Line Chart (Sea Level Changes)
-function createLineChart(labels, seaLevel) {
+function createLineChart(data) {
     const ctx = document.getElementById('lineChart').getContext('2d');
     new Chart(ctx, {
         type: 'line',
         data: {
-            labels: labels,
-            datasets: [{ label: 'Sea Level (m)', data: seaLevel, borderColor: 'green', fill: false }]
+            labels: ["Temperature", "Sea Level"],
+            datasets: [{
+                label: data.city,
+                data: [data.temperature, data.seaLevel],
+                borderColor: 'green',
+                fill: false
+            }]
         }
     });
 }
-
-// Function to plot markers on the map
-function plotMap(latitudes, longitudes, temperature) {
-    const map = L.map('map').setView([latitudes[0], longitudes[0]], 13);
+function updateMap(data) {
+    const map = L.map('map').setView([data.latitude, data.longitude], 10);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
-    latitudes.forEach((lat, index) => {
-        L.marker([lat, longitudes[index]])
-            .addTo(map)
-            .bindPopup(`Temperature: ${temperature[index]}°C`);
-    });
+    L.marker([data.latitude, data.longitude]).addTo(map).bindPopup(`${data.city}: ${data.temperature}°C`).openPopup();
 }
+document.getElementById("searchButton").addEventListener("click", searchCity);
