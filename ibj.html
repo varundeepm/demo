@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Data Visualization with Map</title>
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Load Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Load Leaflet.js -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+<body>
+    <h2>CSV Data Visualization with Map</h2>
+
+    <!-- File Upload -->
+    <input type="file" id="csvFileInput" accept=".csv">
+
+    <!-- Data Table -->
+    <table id="data-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Temperature (°C)</th>
+                <th>CO2 (ppm)</th>
+                <th>Sea Level (m)</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <!-- Bar Chart -->
+    <h3>Bar Chart (Temperature & CO2 Levels)</h3>
+    <canvas id="barChart"></canvas>
+
+    <!-- Pie Chart -->
+    <h3>Pie Chart (CO2 Levels)</h3>
+    <canvas id="pieChart"></canvas>
+
+    <!-- Line Chart -->
+    <h3>Line Chart (Sea Level Changes)</h3>
+    <canvas id="lineChart"></canvas>
+
+    <!-- Map -->
+    <h3>Location Map (Temperature Data)</h3>
+    <div id="map"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
